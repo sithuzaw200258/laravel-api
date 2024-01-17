@@ -21,14 +21,16 @@ use App\Http\Controllers\Api\ProductApiController;
 //     return $request->user();
 // });
 
-Route::post('/register',[AuthApiController::class,'register'])->name('api.register');
-Route::post('/login',[AuthApiController::class,'login'])->name('api.login');
-
-Route::middleware(['auth:sanctum'])->group(function () {
-    Route::post('/logout',[AuthApiController::class,'logout'])->name('api.logout');
-    Route::post('/logout-all',[AuthApiController::class,'logoutAll'])->name('api.logout-all');
-    Route::get('/tokens',[AuthApiController::class,'tokens'])->name('api.tokens');
-
-    Route::apiResource('products', ProductApiController::class);
-    Route::apiResource('photos', PhotoApiController::class);
+Route::prefix('v1')->group(function () {
+    Route::post('/register',[AuthApiController::class,'register'])->name('api.register');
+    Route::post('/login',[AuthApiController::class,'login'])->name('api.login');
+    
+    Route::middleware(['auth:sanctum'])->group(function () {
+        Route::post('/logout',[AuthApiController::class,'logout'])->name('api.logout');
+        Route::post('/logout-all',[AuthApiController::class,'logoutAll'])->name('api.logout-all');
+        Route::get('/tokens',[AuthApiController::class,'tokens'])->name('api.tokens');
+    
+        Route::apiResource('products', ProductApiController::class);
+        Route::apiResource('photos', PhotoApiController::class);
+    });
 });

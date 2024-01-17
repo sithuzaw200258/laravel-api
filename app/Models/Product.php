@@ -15,4 +15,12 @@ class Product extends Model
     public function photos(){
         return $this->hasMany(Photo::class);
     }
+
+    /**
+     * Get the user that owns the Product
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
