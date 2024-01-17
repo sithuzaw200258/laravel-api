@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\Photo;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 
@@ -33,7 +35,18 @@ class ProductApiController extends Controller
             "name" => $request->name,
             "price" => $request->price,
             "stock" => $request->stock,
+            "user_id" => Auth::id(),
         ]);
+
+        if ($request->file("photos")) {
+            $photos = [];
+            foreach ($request->file("photos") as $key => $photo) {
+                $file_name = $photo->store("public");
+                $photos[$key] = new Photo(["name"=>$file_name]);
+            }
+
+            $product->photos()->saveMany($photos);
+        }
 
         return response()->json($product);
     }
