@@ -13,6 +13,10 @@ use App\Http\Requests\UpdateProductRequest;
 
 class ProductApiController extends Controller
 {
+    // public function __construct() {
+    //     sleep(1);
+    // }
+
     /**
      * Display a listing of the resource.
      *
@@ -20,7 +24,13 @@ class ProductApiController extends Controller
      */
     public function index()
     {
-        $products = Product::latest("id")->paginate(10);
+        $products = Product::when(request('keyword'),function ($q) {
+            $q->where('name','like','%'.request('keyword').'%');
+        })
+        ->latest("id")
+        ->paginate(5)
+        ->withQueryString()
+        ->onEachSide(1);
         return ProductResource::collection($products);
     }
 
@@ -39,6 +49,8 @@ class ProductApiController extends Controller
             "user_id" => Auth::id(),
         ]);
 
+        // return $request;
+
         if ($request->file("photos")) {
             $photos = [];
             foreach ($request->file("photos") as $key => $photo) {
@@ -49,7 +61,11 @@ class ProductApiController extends Controller
             $product->photos()->saveMany($photos);
         }
 
-        return response()->json($product);
+        return response()->json([
+            "message" => "Product is created successfully.",
+            "success" => true,
+            "product" => new ProductResource($product)
+        ]);
     }
 
     /**
@@ -92,7 +108,11 @@ class ProductApiController extends Controller
     
         $product->update();
 
-        return response()->json($product);
+        return response()->json([
+            "message" => "Product is updated successfully.",
+            "success" => true,
+            "product" => new ProductResource($product)
+        ]);
     }
 
     /**
@@ -108,6 +128,6 @@ class ProductApiController extends Controller
             return response()->json(["message" => "Product is not found."], 404);
         }
         $product->delete();
-        return response()->json(["message" => "Product is deleted."],204);
+        return response()->json(["message" => "Product is deleted successfully."]);
     }
 }
